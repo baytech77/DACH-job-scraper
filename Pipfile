@@ -1,0 +1,26 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+djangorestframework = "*"
+pillow = "*"
+python-decouple = "*"
+redis = "*"
+celery = "*"
+requests = "*"
+beautifulsoup4 = "*"
+psycopg2 = "*"
+django-tailwind = "*"
+django-browser-reload = "*"
+django-celery-results = "*"
+django-celery-beat = "*"
+lxml = "*"
+fake-useragent = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.13"

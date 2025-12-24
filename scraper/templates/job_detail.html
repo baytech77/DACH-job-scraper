@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ job.title }} - {{ job.company.name }} | Job Scraper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-900 min-h-screen">
+    <!-- Back Button -->
+    <div class="max-w-4xl mx-auto px-4 pt-8">
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 mb-8">
+            <i class="fas fa-arrow-left mr-3 text-gray-500"></i>
+            <span class="font-semibold text-gray-700 dark:text-gray-300">Back to Dashboard</span>
+        </a>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 pb-12">
+        <!-- Job Header -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700/50 p-10 md:p-12 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-start lg:space-x-8 space-y-6 lg:space-y-0">
+                <!-- Company Logo/Info -->
+                <div class="flex-shrink-0">
+                    {% if job.company.website %}
+                    <a href="{{ job.company.website }}" target="_blank" class="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl hover:shadow-3xl transition-all duration-300 mb-4 block">
+                        <i class="fas fa-building text-2xl md:text-3xl text-white"></i>
+                    </a>
+                    {% else %}
+                    <div class="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl flex items-center justify-center shadow-2xl mb-4">
+                        <i class="fas fa-building text-2xl md:text-3xl text-white"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center lg:text-left">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ job.company.name }}</h2>
+                        {% if job.company.email %}
+                        <div class="flex items-center justify-center lg:justify-start mb-3">
+                            <i class="fas fa-envelope text-emerald-500 mr-2"></i>
+                            <a href="mailto:{{ job.company.email }}" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 font-semibold">{{ job.company.email }}</a>
+                        </div>
+                        {% endif %}
+                        {% if job.company.website %}
+                        <a href="{{ job.company.website }}" target="_blank" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium text-sm">
+                            <i class="fas fa-globe mr-1"></i>
+                            Visit Website
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="flex-1">
+                    <div class="flex items-start justify-between mb-6">
+                        <div>
+                            <h1 class="text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-gray-900 to-slate-700 dark:from-white dark:to-slate-200 bg-clip-text text-transparent mb-3 leading-tight">
+                                {{ job.title }}
+                            </h1>
+                            <div class="flex items-center space-x-6 text-sm">
+                                <div class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    {{ job.location }}
+                                </div>
+                                <div class="flex items-center text-blue-600 dark:text-blue-400">
+                                    <i class="fas fa-clock mr-2"></i>
+                                    <span>Scraped {{ job.scraped_at|timesince }} ago</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Sources -->
+                        <div class="flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/50 dark:to-indigo-900/50 px-4 py-2 rounded-2xl">
+                            {% for source in job.sources %}
+                            <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-xl capitalize">
+                                {{ source }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid md:grid-cols-2 gap-4 mb-8">
+                        <a href="{{ job.source_url }}" target="_blank" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center space-x-3 group hover:-translate-y-1">
+                            <i class="fas fa-external-link-alt group-hover:translate-x-1 transition-transform"></i>
+                            <span>View Original Posting</span>
+                        </a>
+                        {% if job.company.email %}
+                        <a href="mailto:{{ job.company.email }}?subject=Application: {{ job.title }}&body=Hello,%0D%0A%0D%0AI am interested in the {{ job.title }} position." class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center space-x-3 group hover:-translate-y-1">
+                            <i class="fas fa-paper-plane group-hover:translate-x-1 transition-transform"></i>
+                            <span>Email Company</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Description -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/50 dark:border-gray-700/50 p-10 md:p-12">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+                <i class="fas fa-align-left mr-3 text-blue-500"></i>
+                Job Description
+            </h3>
+            <div class="prose prose-lg max-w-none dark:prose-invert">
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ job.description|linebreaks|truncatewords_html:200 }}</p>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12">
+            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-8 rounded-3xl shadow-2xl text-center">
+                <i class="fas fa-layer-group text-4xl mb-4 block"></i>
+                <h4 class="text-2xl font-bold mb-2">{{ job.sources|length }} Source{{ job.sources|length|pluralize }}</h4>
+                <p class="text-emerald-100">Found on multiple platforms</p>
+            </div>
+            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-8 rounded-3xl shadow-2xl text-center">
+                <i class="fas fa-database text-4xl mb-4 block"></i>
+                <h4 class="text-2xl font-bold mb-2">Job ID: {{ job.id }}</h4>
+                <p class="text-blue-100">Database Record</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white p-8 rounded-3xl shadow-2xl text-center">
+                <i class="fas fa-calendar text-4xl mb-4 block"></i>
+                <h4 class="text-2xl font-bold mb-2">{{ job.scraped_at|date:"M d, Y" }}</h4>
+                <p class="text-purple-100">Scraped Date</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Smooth scroll and animations
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    </script>
+</body>
+</html>
