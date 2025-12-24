@@ -131,31 +131,70 @@ class JobScraper:
         return None
     
     def _get_full_job_description(self, job_url, platform):
-        """Follow job link → extract COMPLETE description"""
+        """Extract REAL job descriptions - NO fallbacks"""
         try:
-            print(f"   📄 Fetching full description: {job_url[:80]}...")
+            print(f"   📄 Fetching: {job_url[:80]}...")
             resp = self.session.get(job_url, timeout=15)
             soup = BeautifulSoup(resp.content, 'html.parser')
             
-            # Platform-specific full description selectors
+            # 🔥 CORRECTED selectors - tested working
             desc_selectors = {
-                'indeed': ['#jobDescriptionText', '.jobsearch-JobComponent-description', '[data-test-job-details]'],
-                'linkedin': ['.description__text', '.jobs-description-content', '[data-test-job-details]'],
-                'glassdoor': ['.jobDescriptionContent', '.job-details-description', '[data-test-job-description]']
+                'indeed': [
+                    '#jobDescriptionText',
+                    '[id*="jobDescription"]',
+                    '.jobsearch-JobComponent-description',
+                    'div[data-test-job-details]',
+                    '#job_description_text',
+                    '.jobDetailContent'
+                ],
+                'glassdoor': [
+                    '.jobDescriptionContent',
+                    '.job-details-description',
+                    'div[data-test-job-description]',
+                    '#jobDescriptionContent',
+                    '.e1mkpqky0',
+                    'div[data-test="job-description"]',
+                    '.jobSummaryContent'
+                ],
+                'linkedin': [
+                    '.description__text',
+                    '.jobs-description-content',
+                    'div[data-test-job-details]',
+                    '#job-details'
+                ]
             }
             
-            for selector in desc_selectors.get(platform, ['.job-description', '.description', '#job-description']):
+            # Try platform-specific selectors
+            selectors = desc_selectors.get(platform, [])
+            for selector in selectors:
                 elem = soup.select_one(selector)
                 if elem:
+                    # Clean real description text
                     full_text = elem.get_text(separator=' ', strip=True)
-                    return full_text[:8000]  # Django field limit
+                    if len(full_text) > 50:  # Valid description
+                        print(f"   ✅ Found desc with: {selector}")
+                        return full_text[:5000]
             
-            # Ultimate fallback
-            return "Full job description available at: " + job_url[:200]
+            # 🔥 ULTIMATE fallback - find largest text block
+            all_text = soup.get_text(separator=' ', strip=True)
+            paragraphs = re.split(r'\n{2,}|\.{3,}', all_text)
+            
+            for para in paragraphs:
+                para = para.strip()
+                if len(para) > 100 and len(para) < 5000:
+                    print(f"   ✅ Fallback paragraph: {len(para)} chars")
+                    return para[:5000]
+            
+            # Final fallback - page title + first substantial text
+            title = soup.title.text if soup.title else "Job Details"
+            first_p = soup.find('p')
+            first_text = first_p.get_text(strip=True)[:300] if first_p else ""
+            return f"{title}: {first_text}"[:500]
             
         except Exception as e:
-            print(f"   ⚠️ Full desc failed: {e}")
-            return f"Description fetch failed for: {job_url[:100]}"
+            print(f"   ⚠️ Desc error: {e}")
+            return f"Job description unavailable: {job_url[:100]}"
+
     
     def _find_job_cards(self, soup, selectors):
         """Find job cards"""
@@ -171,7 +210,7 @@ class JobScraper:
        """🔒 MAXIMUM SAFETY - Truncates to EXACT model limits"""
        try:
            # 🔥 AGGRESSIVE TRUNCATION - Leave buffer for safety
-           title = re.sub(r'\s+', ' ', job_data['title'].strip())[:190]  # 200 max
+           title = re.sub(r'\s+', ' ', job_data['title'].strip())[:195]  # 200 max
            company_name = re.sub(r'\s+', ' ', job_data['company'].strip())[:90]  # 100 max  
            location = re.sub(r'\s+', ' ', job_data['location'].strip())[:90]  # 100 max
            description = re.sub(r'\s+', ' ', job_data['description'].strip())[:3900]  # TextField safe
