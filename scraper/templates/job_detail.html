@@ -1,14 +1,8 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ job.title }} - {{ job.company.name }} | Job Scraper</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-900 min-h-screen">
-    <!-- Back Button -->
+{% extends "base.html" %}
+    
+    {% block content %}
+    <title>{% block title %}{{ job.title }} - {{ job.company.name }} | Job Scraper{% endblock title %}</title>
+  <!-- Back Button -->
     <div class="max-w-4xl mx-auto px-4 pt-8">
         <a href="{% url 'dashboard' %}" class="inline-flex items-center px-6 py-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700 mb-8">
             <i class="fas fa-arrow-left mr-3 text-gray-500"></i>
@@ -84,8 +78,8 @@
                             <i class="fas fa-external-link-alt group-hover:translate-x-1 transition-transform"></i>
                             <span>View Original Posting</span>
                         </a>
-                        {% if job.company.email %}
-                        <a href="mailto:{{ job.company.email }}?subject=Application: {{ job.title }}&body=Hello,%0D%0A%0D%0AI am interested in the {{ job.title }} position." class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center space-x-3 group hover:-translate-y-1">
+                        {% if Job.company.email %}
+                        <a href="mailto:{{ Job.company.email }}?subject=Application: {{ job.title }}&body=Hello,%0D%0A%0D%0AI am interested in the {{ job.title }} position." class="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-300 flex items-center justify-center space-x-3 group hover:-translate-y-1">
                             <i class="fas fa-paper-plane group-hover:translate-x-1 transition-transform"></i>
                             <span>Email Company</span>
                         </a>
@@ -101,8 +95,8 @@
                 <i class="fas fa-align-left mr-3 text-blue-500"></i>
                 Job Description
             </h3>
-            <div class="prose prose-lg max-w-none dark:prose-invert">
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ job.description|linebreaks|truncatewords_html:200 }}</p>
+            <div class="prose  dark:text-gray-300 prose-lg max-w-none dark:prose-invert">
+                <p class="leading-relaxed text-gray-700    whitespace-pre-wrap">{{ job.description|linebreaks|truncatewords_html:200 }}</p>
             </div>
         </div>
 
@@ -130,5 +124,4 @@
         // Smooth scroll and animations
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     </script>
-</body>
-</html>
+    {% endblock content %}

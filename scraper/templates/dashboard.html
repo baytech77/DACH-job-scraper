@@ -1,47 +1,11 @@
 <!-- templates/scraper/dashboard.html -->
 
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@headlessui/vue@1.7.16/dist/headlessui.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+{% extends "base.html" %}
     
-    <title>DACH Job Scraper - Dashboard</title>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    animation: {
-                        'fade-in': 'fadeIn 0.5s ease-in-out',
-                        'slide-up': 'slideUp 0.3s ease-out',
-                    },
-                    keyframes: {
-                        fadeIn: {
-                            '0%': { opacity: '0', transform: 'translateY(10px)' },
-                            '100%': { opacity: '1', transform: 'translateY(0)' }
-                        },
-                        slideUp: {
-                            '0%': { transform: 'translateY(20px)', opacity: '0' },
-                            '100%': { transform: 'translateY(0)', opacity: '1' }
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-gray-900 min-h-screen transition-all duration-300">
-    <!-- Dark Mode Toggle -->
-    <button id="darkToggle" class="fixed top-5 right-5 z-50 p-3 rounded-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50 dark:border-gray-700/50">
-        <i class="fas fa-sun text-yellow-500 dark:hidden w-5 h-5"></i>
-        <i class="fas fa-moon text-gray-400 hidden dark:block w-5 h-5"></i>
-    </button>
-
+    {% block content %}
+    
+    <title>{% block title %} DACH Job Scraper - Dashboard {% endblock title %}</title>  
+    
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <!-- Hero Section -->
         <div class="text-center mb-16 animate-fade-in">
@@ -110,7 +74,7 @@
                         </label>
                         <div class="relative">
                             <select name="platform" required 
-                                class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg font-medium focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 appearance-none bg-no-repeat bg-right">
+                                class="w-full px-5 py-4 bg-white/50 dark:text-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg font-medium focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 appearance-none bg-no-repeat bg-right">
                                 <option value="" disabled selected>Choose job platform...</option>
                                 <option value="linkedin" class="bg-blue-50 dark:bg-blue-900/50">
                                     <i class="fas fa-linkedin mr-2"></i>LinkedIn
@@ -133,7 +97,7 @@
                             Filtered Job URL
                         </label>
                         <input type="url" name="filtered_url" placeholder="https://www.linkedin.com/jobs/search/?keywords=python&location=Germany" required
-                            class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 placeholder-gray-500">
+                            class="w-full px-5 py-4 bg-white/50 dark:text-white dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all duration-300 placeholder-gray-500">
                         <p class="text-xs text-gray-500 mt-2 flex items-center">
                             <i class="fas fa-info-circle mr-1"></i>
                             Use filtered search URLs for DACH region (Germany, Austria, Switzerland)
@@ -147,7 +111,7 @@
                             Number of Jobs
                         </label>
                         <input type="number" name="num_jobs" min="1" max="100" value="20" required
-                            class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 appearance-none">
+                            class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 dark:text-white border-2 border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300 appearance-none">
                     </div>
 
                     <!-- Submit Button -->
@@ -310,26 +274,5 @@
             </div>
         </div>
     </div>
+    {% endblock content %}
 
-    <script>
-        // Dark mode toggle
-        const darkToggle = document.getElementById('darkToggle');
-        darkToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        });
-
-        // Load saved theme
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
-
-        // Form submission feedback
-        document.getElementById('scrapeForm').addEventListener('submit', function() {
-            const button = this.querySelector('button[type="submit"]');
-            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-3"></i><span>Scraping in progress...</span>';
-            button.disabled = true;
-        });
-    </script>
-</body>
-</html>

@@ -13,3 +13,6 @@ def scrape_jobs_task(self, platform, filtered_url, num_jobs):
     except Exception as e:
         print(f"❌ Error: {e}")
         raise e
+
+
+
