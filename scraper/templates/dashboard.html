@@ -1,7 +1,8 @@
 <!-- templates/scraper/dashboard.html -->
 {% extends "base.html" %}
-    
+   
 {% block content %}
+
 <title>{% block title %} DACH Job Scraper - Dashboard {% endblock title %}</title>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Hero Section -->
@@ -24,7 +25,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Jobs</p>
-                    <p class="text-3xl font-bold text-emerald-600">{{ recent_jobs|length }}</p>
+                    <p class="text-3xl font-bold text-emerald-600">{{ recent_jobs }}</p>
                 </div>
                 <i class="fas fa-briefcase text-4xl text-emerald-500 group-hover:rotate-12 transition-transform duration-300"></i>
             </div>
@@ -95,12 +96,15 @@
                         <select name="location" required 
                             class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 border-2 dark:text-white border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300">
                             <option value="" disabled selected>Choose desired location..</option>
-                            <option value="Deutschland">🇩🇪 Deutschland</option>
-                            <option value="Berlin">🇩🇪 Berlin</option>
-                            <option value="München">🇩🇪 München</option>
-                            <option value="Remote">🌐 Remote</option>
-                            <option value="Lagos">🇳🇬 Lagos</option>
-                            <option value="Nigeria">🇳🇬 Nigeria</option>
+                            {% load countries %} 
+                            {% for code, name in countries %}
+                            
+                            <option value="Remote">Remote</option>
+                            <option value="{{ name }}">
+                               <img src="flagcdn.com{{ code|lower }}.png" width="20" alt="">
+                                {{ name }}
+                            </option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -164,18 +168,80 @@
             {% endif %}
 
             <!-- Task Status -->
+            <!-- 🔥 AUTO-REFRESH TASK STATUS -->
             {% if task_status %}
-            <div class="mt-8 p-6 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-3xl text-white animate-pulse">
-                <h3 class="text-2xl font-bold mb-4 flex items-center">
-                    <i class="fas fa-tasks mr-3"></i>
-                    Task: {{ task_status.status|upper }}
-                </h3>
-                {% if task_status.result %}
-                <p class="text-2xl font-bold">{{ task_status.result }} jobs saved! 🎉</p>
-                {% endif %}
-                <p><strong>ID:</strong> {{ task_status.id }}</p>
+            <div id="taskStatusCard" class="mt-12 p-8 bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-500 rounded-3xl text-white shadow-2xl border-4 border-yellow-300/50 animate-pulse mb-8">
+                <!-- Header with controls -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mr-4 animate-spin-slow">
+                            <i class="fas fa-sync-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold flex items-center">
+                                <span>🔄 Live Task Status:</span>
+                                <span id="taskStatus" class="ml-2 px-3 py-1 bg-white/30 rounded-full font-mono">
+                                    {{ task_status.status|upper }}
+                                </span>
+                            </h3>
+                            <p class="text-sm opacity-90" id="taskJobsCount">Loading...</p>
+                        </div>
+                    </div>
+
+                    <!-- 🔥 REFRESH CONTROLS -->
+                    <div class="flex items-center space-x-3 flex-shrink-0">
+                        <button id="refreshBtn" class="p-3 bg-white/30 hover:bg-white/50 rounded-2xl backdrop-blur-sm transition-all duration-300 flex items-center space-x-2 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105">
+                            <i class="fas fa-sync-alt animate-spin" id="refreshIcon"></i>
+                            <span id="refreshText">Refresh</span>
+                        </button>
+                        <button id="toggleAutoBtn" class="p-3 bg-emerald-500/80 hover:bg-emerald-600 rounded-2xl backdrop-blur-sm transition-all duration-300 flex items-center space-x-2 text-white font-semibold shadow-lg hover:shadow-xl">
+                            <i class="fas fa-pause" id="autoIcon"></i>
+                            <span id="autoText">Auto: ON</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Details -->
+                <div class="grid md:grid-cols-2 gap-4 mb-6 p-6 bg-white/20 backdrop-blur-xl rounded-2xl">
+                    <div>
+                        <span class="text-sm opacity-90 block">Task ID:</span>
+                        <code class="font-mono text-lg font-bold block mt-1" id="taskId">{{ task_status.id }}</code>
+                    </div>
+                    <div id="taskResult" class="text-right">
+                        {% if task_status.result %}
+                        <div class="text-3xl font-black bg-emerald-500/80 px-6 py-3 rounded-xl shadow-2xl">
+                            ✅ {{ task_status.result }} Jobs Saved!
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Latest Jobs Preview -->
+                <div id="liveJobsPreview" class="space-y-3">
+                    <h4 class="text-xl font-bold flex items-center mb-4">
+                        <i class="fas fa-briefcase mr-2"></i>
+                        Latest Jobs <span class="ml-2 px-2 py-1 bg-white/30 rounded-full text-sm">Live</span>
+                    </h4>
+                    <div id="jobsList" class="grid md:grid-cols-3 gap-3 max-h-48 overflow-y-auto p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+                        <div class="text-center py-8 text-white/70">
+                            <i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i>
+                            <span>Updating...</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <style>
+            @keyframes spin-slow {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
+            }
+            .animate-spin-slow {
+                animation: spin-slow 3s linear infinite;
+            }
+            </style>
             {% endif %}
+
         </div>
     </div>
 
@@ -329,6 +395,144 @@
 
 <!-- JavaScript for Live Preview -->
 <script>
+
+
+<!-- 🔥 LIVE AUTO-REFRESH SCRIPT (add before </body>) -->
+class TaskAutoRefresher {
+    constructor(taskId) {
+        this.taskId = taskId;
+        this.isAutoRefreshing = true;
+        this.refreshInterval = null;
+        this.init();
+    }
+    
+    init() {
+        this.bindButtons();
+        this.startAutoRefresh();
+        this.manualRefresh();  // Initial load
+    }
+    
+    bindButtons() {
+        // Manual refresh
+        document.getElementById('refreshBtn').onclick = () => {
+            this.manualRefresh(true);
+        };
+        
+        // Toggle auto-refresh
+        document.getElementById('toggleAutoBtn').onclick = () => {
+            this.toggleAutoRefresh();
+        };
+    }
+    
+    startAutoRefresh() {
+        this.refreshInterval = setInterval(() => {
+            if (this.isAutoRefreshing) {
+                this.manualRefresh();
+            }
+        }, 5000);  // 🔥 Every 5 seconds
+    }
+    
+    toggleAutoRefresh() {
+        this.isAutoRefreshing = !this.isAutoRefreshing;
+        const btn = document.getElementById('toggleAutoBtn');
+        const icon = document.getElementById('autoIcon');
+        const text = document.getElementById('autoText');
+        
+        if (this.isAutoRefreshing) {
+            icon.className = 'fas fa-pause';
+            text.textContent = 'Auto: ON';
+            btn.className = 'p-3 bg-emerald-500/80 hover:bg-emerald-600 ...';
+            this.startAutoRefresh();
+        } else {
+            icon.className = 'fas fa-play';
+            text.textContent = 'Auto: OFF';
+            btn.className = 'p-3 bg-gray-500/80 hover:bg-gray-600 ...';
+            clearInterval(this.refreshInterval);
+        }
+    }
+    
+    manualRefresh(showFeedback = false) {
+        const refreshBtn = document.getElementById('refreshBtn');
+        const icon = document.getElementById('refreshIcon');
+        const text = document.getElementById('refreshText');
+        
+        // Show loading
+        icon.classList.add('fa-spin');
+        text.textContent = 'Updating...';
+        
+        fetch(`/task/${this.taskId}/status/`)
+            .then(response => response.json())
+            .then(data => {
+                this.updateUI(data);
+                
+                // Feedback
+                if (showFeedback) {
+                    text.textContent = 'Updated!';
+                    icon.classList.remove('fa-spin');
+                    setTimeout(() => {
+                        text.textContent = 'Refresh';
+                        icon.className = 'fas fa-sync-alt';
+                    }, 1500);
+                } else {
+                    icon.classList.remove('fa-spin');
+                    text.textContent = 'Refresh';
+                }
+            })
+            .catch(error => {
+                console.error('Refresh failed:', error);
+                text.textContent = 'Error';
+            });
+    }
+    
+    updateUI(data) {
+        // Update status
+        document.getElementById('taskStatus').textContent = data.status.toUpperCase();
+        
+        // Update job count
+        document.getElementById('taskJobsCount').textContent = 
+            `${data.jobs_count} jobs loaded • Total: ${data.total_jobs}`;
+        
+        // Update result
+        const resultDiv = document.getElementById('taskResult');
+        if (data.result) {
+            resultDiv.innerHTML = `
+                <div class="text-3xl font-black bg-emerald-500/90 px-6 py-3 rounded-xl shadow-2xl">
+                    ✅ ${data.result} Jobs Saved!
+                </div>
+            `;
+        }
+        
+        // Update jobs list
+        const jobsList = document.getElementById('jobsList');
+        if (data.jobs && data.jobs.length > 0) {
+            jobsList.innerHTML = data.jobs.map(job => `
+                <div class="group bg-white/40 hover:bg-white/60 p-4 rounded-xl backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border border-white/50">
+                    <h5 class="font-bold text-sm mb-1 line-clamp-2 group-hover:text-gray-900">${job.title}</h5>
+                    <p class="text-xs text-gray-700 font-medium">${job.company}</p>
+                    <p class="text-xs text-gray-500">${job.location}</p>
+                    ${job.email ? `<span class="inline-block mt-1 px-2 py-1 bg-emerald-400/80 text-xs rounded-full text-white font-bold">📧 Email</span>` : ''}
+                </div>
+            `).join('');
+        } else {
+            jobsList.innerHTML = `
+                <div class="col-span-full text-center py-8 text-white/70">
+                    <i class="fas fa-spinner fa-pulse text-2xl mb-2 block"></i>
+                    <span>${data.status === 'SUCCESS' ? 'No new jobs' : 'Scraping in progress...'}</span>
+                </div>
+            `;
+        }
+    }
+}
+
+// 🔥 Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const taskId = document.querySelector('#taskStatusCard')?.dataset?.taskId || 
+                   '{{ task_id|default:"" }}';
+    if (taskId) {
+        new TaskAutoRefresher(taskId);
+    }
+});
+
 document.getElementById('scrapeForm').addEventListener('input', function() {
     const keywords = document.querySelector('input[name="keywords"]').value;
     const location = document.querySelector('select[name="location"]').value;
@@ -351,38 +555,10 @@ document.getElementById('scrapeForm').addEventListener('input', function() {
         document.getElementById('urlPreview').classList.remove('hidden');
     }
 });
+
 </script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const locationSelect = document.getElementById('locationSelect');
-    const locationCustom = document.getElementById('locationCustom');
-    const detectedCountry = document.getElementById('detectedCountry');
-    
-    // Show detected country
-    {% if country_info.country_name %}
-        detectedCountry.textContent = '{{ country_info.country_name }}';
-    {% endif %}
-    
-    // Custom location toggle
-    locationSelect.addEventListener('change', function() {
-        if (this.value === 'custom') {
-            locationCustom.classList.remove('opacity-0', 'invisible');
-            locationCustom.classList.add('opacity-100', 'visible');
-            locationCustom.focus();
-            locationCustom.name = 'location';  // Use custom input
-            locationSelect.name = '';  // Disable preset select
-        } else {
-            locationCustom.classList.add('opacity-0', 'invisible');
-            locationCustom.classList.remove('opacity-100', 'visible');
-            locationCustom.name = 'location_custom';
-            locationSelect.name = 'location';
-        }
-    });
-    
-    // URL Preview (keep existing)
-    // ... your existing preview code ...
-});
-</script>
+
+
 
 
 {% endblock content %}

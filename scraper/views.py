@@ -6,8 +6,36 @@ from .models import Job
 from django.http import JsonResponse
 from celery.result import AsyncResult
 from scraper.services import JobScraper  # Import URL generator
+from django_countries import countries
+from django.http import JsonResponse
 
-# Your existing recent_jobs_api and dashboard views stay the SAME
+def task_status_api(request, task_id):
+    """🔄 AJAX endpoint for LIVE task status + jobs"""
+    try:
+        task_result = AsyncResult(task_id)
+        status = task_result.status
+        
+        # 🔥 Get LATEST jobs (refreshes automatically)
+        recent_jobs = Job.objects.select_related('company').order_by('-scraped_at')[:12]
+        
+        return JsonResponse({
+            'status': status,
+            'result': task_result.result if task_result.ready() else None,
+            'jobs_count': recent_jobs.count(),
+            'total_jobs': Job.objects.count(),
+            'jobs': [{
+                'title': job.title[:60],
+                'company': job.company.name,
+                'location': job.location,
+                'sources': job.sources,
+                'scraped_at': job.scraped_at.isoformat() if job.scraped_at else None,
+                'email': job.company.email,
+            } for job in recent_jobs]
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 def recent_jobs_api(request):
     """API for live job updates"""
     jobs = Job.objects.select_related('company').order_by('-scraped_at')[:10]
@@ -40,6 +68,8 @@ def dashboard(request):
     context = {
         'recent_jobs': recent_jobs,
         'task_status': task_status,
+        'countries': countries,
+        'task_id': task_id,
     }
     return render(request, 'dashboard.html', context)
 

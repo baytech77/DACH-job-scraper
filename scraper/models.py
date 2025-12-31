@@ -1,6 +1,7 @@
 # scraper/models.py
 from django.db import models
 from django.contrib.postgres import fields as pg_fields
+from django_countries.fields import CountryField
 
 class Company(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -25,8 +26,8 @@ class Company(models.Model):
         return self.name
 
 class Job(models.Model):
-    title = models.CharField(max_length=200)
-    location = models.CharField(max_length=200)
+    title = models.CharField(max_length=255)
+    location = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='jobs')
     description = models.TextField()
     source_url = models.URLField()
