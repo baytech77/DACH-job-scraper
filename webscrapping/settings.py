@@ -60,7 +60,7 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {}
 
 # Django Celery Results (for task tracking)
-INSTALLED_APPS += ['django_celery_results', 'django_celery_beat']
+INSTALLED_APPS += ['django_celery_results', 'django_celery_beat', 'django_countries',]
 CELERY_CACHE_BACKEND = 'django-cache'
 
 # Install: pip install django-celery-results django-celery-beat

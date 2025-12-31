@@ -253,3 +253,23 @@ class JobScraper:
        except Exception as e:
            print(f"   ❌ Save error: {str(e)[:80]}")
            return False
+
+
+    @staticmethod
+    def generate_search_url(keywords, location, platform='indeed'):
+        """🔥 Generate platform URLs from keywords + location"""
+        keywords = re.sub(r'\s+', '+', keywords.strip().lower())
+        location = re.sub(r'\s+', '+', location.strip())
+        
+        templates = {
+            'indeed': f"https://de.indeed.com/jobs?q={keywords}&l={location}",
+            'indeed_ng': f"https://ng.indeed.com/jobs?q={keywords}&l={location}",
+            'linkedin': f"https://www.linkedin.com/jobs/search/?keywords={keywords}&location={location}",
+            'glassdoor': f"https://www.glassdoor.com/Job/jobs.htm?sc.keyword={keywords}&locKeyword={location}"
+        }
+        
+        # Auto-detect Nigeria/Germany
+        if 'nigeria' in location.lower() or 'lagos' in location.lower():
+            platform = 'indeed_ng'
+        
+        return templates.get(platform, templates['indeed'])
