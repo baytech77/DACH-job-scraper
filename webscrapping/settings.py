@@ -176,3 +176,4 @@ INTERNAL_IPS = ["127.0.0.1"]
 #NPM_BIN_PATH = r"c:/Program Files/nodejs/npm.cmd"
 #CRISPY_ALLOWED_TEMPLATE_PACKS = 'tailwind'
 #CRISPY_TEMPLATE_PACK = 'tailwind'
+COUNTRIES_FLAG_URL = 'static/flags/{code}.gif' 

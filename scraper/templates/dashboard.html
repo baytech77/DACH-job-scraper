@@ -6,7 +6,7 @@
 <title>{% block title %} DACH Job Scraper - Dashboard {% endblock title %}</title>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
     <!-- Hero Section -->
-    <div class="text-center mb-16 animate-fade-in">
+    <div class="text-center mb-6 animate-fade-in">
         <div class="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-lg mb-6 shadow-xl hover:shadow-2xl transition-all duration-300">
         <i class="fas fa-rocket mr-3"></i>
         DACH Region Job Scraper
@@ -14,9 +14,10 @@
         <h1 class="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-900 dark:from-white to-slate-600 dark:to-slate-300 bg-clip-text text-transparent mb-6">
         Scrape Jobs from LinkedIn, Glassdoor & Indeed
         </h1>
-        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        <p class="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-2xl font-bold mx-auto leading-relaxed">
         Enter filtered job URLs and extract company emails automatically. Built for DACH backend developers.
         </p>
+        
     </div>
 
     <!-- Stats Cards -->
@@ -24,8 +25,9 @@
         <div class="group bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-white/50 dark:border-gray-700/50 animate-slide-up">
             <div class="flex items-center justify-between">
                 <div>
+                    
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Total Jobs</p>
-                    <p class="text-3xl font-bold text-emerald-600">{{ recent_jobs }}</p>
+                    <p id="taskJobsCounts" class="text-3xl font-bold text-emerald-600">{{ total_jobs }}</p>
                 </div>
                 <i class="fas fa-briefcase text-4xl text-emerald-500 group-hover:rotate-12 transition-transform duration-300"></i>
             </div>
@@ -44,7 +46,7 @@
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">Status</p>
                     {% if task_status %}
-                        <p class="text-3xl font-bold text-amber-500">{{ task_status.status|upper }}</p>
+                        <p id="taskStatus" class="text-3xl font-bold text-amber-500">{{ task_status.status|upper }}</p>
                     {% else %}
                         <p class="text-3xl font-bold text-emerald-500">Ready</p>
                     {% endif %}
@@ -96,13 +98,15 @@
                         <select name="location" required 
                             class="w-full px-5 py-4 bg-white/50 dark:bg-gray-900/50 border-2 dark:text-white border-gray-200 dark:border-gray-600 rounded-2xl text-lg focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300">
                             <option value="" disabled selected>Choose desired location..</option>
+                            <option value="Remote">Remote</option>
                             {% load countries %} 
+                            {% load static %}
                             {% for code, name in countries %}
                             
-                            <option value="Remote">Remote</option>
+                            
                             <option value="{{ name }}">
-                               <img src="flagcdn.com{{ code|lower }}.png" width="20" alt="">
-                                {{ name }}
+                               <span>{{ name }}<img class="" src="static/flags/{{ code.lower }}.gif" alt="">
+                                </span>
                             </option>
                             {% endfor %}
                         </select>
@@ -184,6 +188,7 @@
                                     {{ task_status.status|upper }}
                                 </span>
                             </h3>
+                            <p>hello</p>
                             <p class="text-sm opacity-90" id="taskJobsCount">Loading...</p>
                         </div>
                     </div>
@@ -253,17 +258,17 @@
     Recently Scraped Jobs
     </h2>
     <p class="text-xl text-gray-600 dark:text-gray-300">
-    <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ total_jobs }}</span> jobs from
-    <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ total_companies }}</span> companies
+    <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ total_jobs }}</span> <span class="font-bold  text-grey-600 dark:text-grey-400 ">jobs from</span>
+    <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ total_company }}</span> <span class="font-bold  text-grey-600 dark:text-grey-400 " >companies</span>
     </p>
     </div>
     
     {% if recent_jobs %}
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid md:grid-cols-2  lg:grid-cols-3 gap-6">
     {% for job in recent_jobs %}
     <div class="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl hover:shadow-3xl transition-all duration-500 border border-white/50 dark:border-gray-700/50 hover:-translate-y-2">
     <!-- Job Header -->
-    <div class="flex items-start justify-between mb-4">
+    <div  class="flex items-start  justify-between mb-4">
     <div class="flex items-center space-x-3">
     {% if job.company.website %}
     <a href="{{ job.company.website }}" target="_blank" class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -333,10 +338,11 @@
     
     <!-- View All Button -->
     <div class="text-center mt-12">
-    <a href="{% url 'admin:scraper_job_changelist' %}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-2xl text-lg shadow-2xl hover:shadow-3xl transition-all duration-300">
+    <a href="{% url 'all_jobs' %}" class="inline-flex items-center w-auto px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-2xl text-lg shadow-2xl hover:shadow-3xl transition-all duration-300">
     <i class="fas fa-list mr-3"></i>
-    View All {{ total_jobs }} Jobs in Admin
+    View All {{ total_jobs }} Jobs
     </a>
+    
     </div>
     
     {% else %}
@@ -491,6 +497,10 @@ class TaskAutoRefresher {
         // Update job count
         document.getElementById('taskJobsCount').textContent = 
             `${data.jobs_count} jobs loaded • Total: ${data.total_jobs}`;
+        
+        // Update job count
+        document.getElementById('taskJobsCounts').textContent = 
+            `${data.total_jobs}`;    
         
         // Update result
         const resultDiv = document.getElementById('taskResult');

@@ -1,13 +1,14 @@
 from django.urls import path, include
-from .views import dashboard, start_scraping, job_detail, recent_jobs_api, task_status_api
+from .views import dashboard, start_scraping, job_detail, recent_jobs_api, task_status_api, AllJobsAPI, AllJobsView
 
 
 # scraper/urls.py
 urlpatterns = [
     path('', dashboard, name='dashboard'),
-     path('job/<int:job_id>/', job_detail, name='job_detail'),
+    path('job/<int:job_id>/', job_detail, name='job_detail'),
     path('start-scraping/', start_scraping, name='start_scraping'),
     path('api/recent-jobs/', recent_jobs_api, name='recent_jobs_api'),
     path('task/<str:task_id>/status/', task_status_api, name='task_status_api'),
-
+    path('jobs/', AllJobsView.as_view(), name='all_jobs'),
+    path('jobs/api/',AllJobsAPI.as_view(), name='all_jobs_api'),
 ]
